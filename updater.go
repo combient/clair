@@ -53,6 +53,8 @@ var (
 		Name: "clair_updater_notes_total",
 		Help: "Number of notes that the vulnerability fetchers generated.",
 	})
+
+	SourceURLs map[string]string
 )
 
 func init() {
@@ -63,7 +65,8 @@ func init() {
 
 // UpdaterConfig is the configuration for the Updater service.
 type UpdaterConfig struct {
-	Interval time.Duration
+	Interval   time.Duration
+	SourceURLs map[string]string
 }
 
 // RunUpdater begins a process that updates the vulnerability database at
@@ -228,6 +231,9 @@ func fetch(datastore database.Datastore) (bool, []database.Vulnerability, map[st
 	log.Info("fetching vulnerability updates")
 	var responseC = make(chan *vulnsrc.UpdateResponse, 0)
 	for n, u := range vulnsrc.Updaters() {
+		if url, ok := SourceURLs[n]; ok {
+			u.SetSourceUrl(url)
+		}
 		go func(name string, u vulnsrc.Updater) {
 			response, err := u.Update(datastore)
 			if err != nil {

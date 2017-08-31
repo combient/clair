@@ -85,6 +85,10 @@ func stopCPUProfiling(f *os.File) {
 	log.Info("stopped CPU profiling")
 }
 
+func configClairVersion(config *Config) {
+	clair.SourceURLs = config.Updater.SourceURLs
+}
+
 // Boot starts Clair instance with the provided config.
 func Boot(config *Config) {
 	rand.Seed(time.Now().UnixNano())
@@ -158,6 +162,8 @@ func main() {
 	if *flagInsecureTLS {
 		imagefmt.SetInsecureTLS(*flagInsecureTLS)
 	}
+
+	configClairVersion(config)
 
 	Boot(config)
 }
